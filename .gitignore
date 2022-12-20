@@ -1,0 +1,7 @@
+attentionGAN/horse2zebra/
+attentionGAN/model_results/
+attentionGAN/__pycache__/
+attentionGAN/wandb/
+cutGAN/horse2zebra/
+cutGAN/model_results/
+cutGAN/__pycache__/
