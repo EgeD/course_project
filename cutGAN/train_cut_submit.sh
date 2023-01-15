@@ -23,7 +23,7 @@
 
 # -= Resources =-
 #
-#SBATCH --job-name=cut_baseline
+#SBATCH --job-name=cut_baseline_b4
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
 #SBATCH --partition=ai
@@ -32,7 +32,7 @@
 #SBATCH --account=ai
 #SBATCH --mem-per-cpu=8G
 #SBATCH --time=56:00:00
-#SBATCH --output=cut_baseline-%j.out
+#SBATCH --output=cut_baseline_b4-%j.out
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=edincer16@ku.edu.tr
 

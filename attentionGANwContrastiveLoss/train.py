@@ -3,17 +3,15 @@ import cv2
 import glob
 import os
 import random
-import wandb
 import torch.utils.data
-import torch.nn as nn
 import torchvision.transforms as transforms
 import numpy as np
 from tqdm import tqdm
-from attentionGAN import AttentionGAN
+from contrastive_attention import ContrastiveAttention
 from PIL import Image
 from torch.utils.data import Dataset
+import torch.nn as nn
 from visualizer import Visualizer
-
 
 
 def tensor2im(input_image, imtype=np.uint8):
@@ -28,7 +26,7 @@ def tensor2im(input_image, imtype=np.uint8):
             image_tensor = input_image.data
         else:
             return input_image
-        image_numpy = image_tensor[0].cpu().float().numpy()  # convert it into a numpy array
+        image_numpy = image_tensor[0].clamp(-1.0, 1.0).cpu().float().numpy()  # convert it into a numpy array
         if image_numpy.shape[0] == 1:  # grayscale to RGB
             image_numpy = np.tile(image_numpy, (3, 1, 1))
         image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0  # post-processing: tranpose and scaling
@@ -74,7 +72,6 @@ def save_image(image_numpy, image_path, aspect_ratio=1.0):
     image_pil.save(image_path)
 
 
-
 class ImageDataset(Dataset):
     def __init__(self, root, transform=None, unaligned=False, mode="train"):
         self.transform = transform
@@ -99,91 +96,97 @@ class ImageDataset(Dataset):
 
 if __name__ == '__main__':
     # Model initializations
-    experiment_name = 'AttentionGAN_baseline_b4'
     n_epochs = 200
-
     n_epochs_decay = n_epochs
+    batch_size = 8
     norm_layer = nn.BatchNorm2d
+    model = ContrastiveAttention(input_dim=3,output_dim=3,n_epochs=n_epochs,norm_layer=norm_layer,lr_decay_iters=n_epochs_decay,
+    n_epochs_decay=n_epochs_decay,batch_size=batch_size,num_patches=256,
+    lambda_GAN=4.0, lambda_NCE=4.0,gan_mode='lsgan').cuda()
+    experiment_name = 'ContrastiveAttention'
+    data_folder = '/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGANwContrastiveLoss/horse2zebra'
 
     transform = transforms.Compose([
     transforms.Resize(286,Image.BICUBIC),
     transforms.RandomCrop(256),
     transforms.ToTensor()
     ])
-
-
-    model = AttentionGAN(input_dim=3,output_dim=3,n_epochs=n_epochs,norm_layer=norm_layer).cuda()
-    model.setup()
-    data_folder = '/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGAN/horse2zebra'
-    batch_size = 4
-
-    #For Frozen Test
-    # my_model_checkpoint ='/kuacc/users/edincer16/AttentionGAN/cycleGan_from_scratch/saved_models_200ep/96_net_G_A.pth'
-    # model.netG_A.load_state_dict(torch.load(my_model_checkpoint))
-
     dataset = ImageDataset(data_folder,transform=transform,unaligned=True)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
     # Data initializations 
 
-    test_img_path = '/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGAN/horse2zebra/valA/*.jpg'
-    output_path = '/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGAN/model_results/baseline_results/'
+    test_img_path = '/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGANwContrastiveLoss/horse2zebra/valA/*.jpg'
+    output_path = f'/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGANwContrastiveLoss/model_results/'
 
    # transform = transforms.ToTensor()
+    if os.path.exists(output_path+experiment_name):
+        output_path = output_path+experiment_name+'/'
+    else:
+        output_path = output_path + experiment_name
+        os.mkdir(output_path)
+        output_path = output_path +'/'
 
 
-    dataset_size = len(dataset)    # get the number of images in the dataset.
-
-    # saved_model_path = '/kuacc/users/edincer16/comp547/course_project/CelebA/beard_ckpt'
-
-    saved_model_path = '/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGAN/model_results/baseline_weights'
-
-    logger = open(f'/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGAN/{experiment_name}.txt','w')
-
-    #Wandb Addition
-    visualizer = Visualizer(experiment_name,saved_model_path)  
 
     dataset_size = len(dataset)    # get the number of images in the dataset.
+
+    saved_model_path = f'/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGANwContrastiveLoss/model_results/'
+
+    if os.path.exists(saved_model_path+experiment_name+'_weights'):
+        saved_model_path = saved_model_path + experiment_name+'_weights'
+    else:
+        saved_model_path = saved_model_path + experiment_name+'_weights'
+        os.mkdir(saved_model_path)
+        saved_model_path = saved_model_path 
+
+    logger = open(f'/kuacc/users/edincer16/Comp541_fall22/course_project/attentionGANwContrastiveLoss/{experiment_name}.txt','w')
+
     print('The number of training images = %d' % dataset_size)
     total_iters = 0                # the total number of training iterations
+    visualizer = Visualizer(experiment_name,saved_model_path)  
 
     for epoch in tqdm(range(0, n_epochs + n_epochs_decay + 1)):    # outer loop for different epochs; we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>
         epoch_start_time = time.time()  # timer for entire epoch
         iter_data_time = time.time()    # timer for data loading per iteration
         epoch_iter = 0                  # the number of training iterations in current epoch, reset to 0 every epoch
-        model.update_learning_rate()    # update learning rates in the beginning of every epoch.
+
         
         for i, data in enumerate(dataloader):  # inner loop within one epoch
             iter_start_time = time.time()  # timer for computation per iteration
+            
+            if epoch == 0 and i==0:
+                model.init_according_to_data(data)
+                model.setup()
+            
             model.set_input(data)         # unpack data from dataset and apply preprocessing
             model.optimize_parameters()   # calculate loss functions, get gradients, update network weights
 
             iter_data_time = time.time()
+
+
         for img in glob.glob(test_img_path):
             # img_tmp = cv2.imread(img)
-            # img_tmp = cv2.cvtColor(img_tmp, cv2.COLOR_BGR2RGB)
             img_tmp = Image.open(img).convert('RGB')
+            # img_tmp = cv2.cvtColor(img_tmp, cv2.COLOR_BGR2RGB)
             image = transform(img_tmp).unsqueeze(0)
             generated_image, _, _, _, _, _, _, _, _, _, _, \
             _, _, _, _, _, _, _, _, _, _, \
-            _, _, _, _, _, _, _, _, _  = model.netG_A(image.cuda())
-            
-            
+            _, _, _, _, _, _, _, _, _ = model.netG(image.cuda())
             image_name = img.split('/')[-1].split('.')[0] +'_'+str(epoch)+'.png'
             gen_img = tensor2im(generated_image)
-            cv2.imwrite(output_path+f'{experiment_name}_'+image_name,gen_img)
+            cv2.imwrite(output_path+f'{experiment_name}_'+image_name,cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR))
 
         current_losses = model.get_current_losses()
         log_write = f'Epoch: {epoch}, The losses are '+ str(current_losses) + '\n'
         logger.write(log_write)
-        #Wandb-Visualizations
         visualizer.plot_current_losses(current_losses)
         visualizer.display_current_results(model.get_current_visuals(), epoch)
+
         if epoch % 4 == 0:
             model.save_networks(epoch,experiment_name,saved_model_path)
             model.cuda() # sending model back to gpu
 
+        model.update_learning_rate()  
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, n_epochs + n_epochs_decay, time.time() - epoch_start_time))
-
     logger.close()

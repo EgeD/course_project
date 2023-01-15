@@ -1,0 +1,62 @@
+Activating Python 3.6.3...
+Setting stack size to unlimited...
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+scheduling priority             (-e) 0
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 2061307
+max locked memory       (kbytes, -l) unlimited
+max memory size         (kbytes, -m) 33554432
+open files                      (-n) 51200
+pipe size            (512 bytes, -p) 8
+POSIX message queues     (bytes, -q) 819200
+real-time priority              (-r) 0
+stack size              (kbytes, -s) unlimited
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 4096
+virtual memory          (kbytes, -v) unlimited
+file locks                      (-x) unlimited
+
+/kuacc/users/edincer16/.conda/envs/cyclegan/lib/python3.8/site-packages/torchvision/transforms/transforms.py:287: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+wandb: Currently logged in as: edincer16 (use `wandb login --relogin` to force relogin)
+The number of training images = 1334
+wandb: wandb version 0.13.9 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.12.9
+wandb: Syncing run ContrastiveAttention
+wandb:  View project at https://wandb.ai/edincer16/CycleGAN-SlotAttention
+wandb:  View run at https://wandb.ai/edincer16/CycleGAN-SlotAttention/runs/383t5s32
+wandb: Run data is saved locally in /scratch/users/edincer16/Comp541_fall22/course_project/attentionGANwContrastiveLoss/wandb/run-20230113_003452-383t5s32
+wandb: Run `wandb offline` to turn off syncing.
+
+  0% 0/401 [00:00<?, ?it/s]/scratch/users/edincer16/Comp541_fall22/course_project/attentionGANwContrastiveLoss/discriminator.py:103: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  patch_id = torch.tensor(patch_id, dtype=torch.long, device=feature.device)
+  0% 0/401 [05:38<?, ?it/s]
+Traceback (most recent call last):
+  File "train.py", line 183, in <module>
+    visualizer.display_current_results(model.get_current_visuals(), epoch)
+  File "/kuacc/users/edincer16/.conda/envs/cyclegan/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1177, in __getattr__
+    raise AttributeError("'{}' object has no attribute '{}'".format(
+AttributeError: 'ContrastiveAttention' object has no attribute 'get_current_visuals'
+wandb: Waiting for W&B process to finish, PID 166586... (failed 1). Press ctrl-c to abort syncing.
+wandb: - 0.00MB of 0.00MB uploaded (0.00MB deduped)wandb: \ 0.00MB of 0.00MB uploaded (0.00MB deduped)wandb: | 0.00MB of 0.00MB uploaded (0.00MB deduped)wandb: / 0.00MB of 0.01MB uploaded (0.00MB deduped)wandb: - 0.00MB of 0.01MB uploaded (0.00MB deduped)wandb: \ 0.00MB of 0.01MB uploaded (0.00MB deduped)wandb: | 0.00MB of 0.01MB uploaded (0.00MB deduped)wandb: / 0.01MB of 0.01MB uploaded (0.00MB deduped)wandb: - 0.01MB of 0.01MB uploaded (0.00MB deduped)wandb: \ 0.01MB of 0.01MB uploaded (0.00MB deduped)wandb: | 0.01MB of 0.01MB uploaded (0.00MB deduped)wandb: / 0.01MB of 0.01MB uploaded (0.00MB deduped)wandb: - 0.01MB of 0.01MB uploaded (0.00MB deduped)wandb: \ 0.01MB of 0.01MB uploaded (0.00MB deduped)wandb:                                                                                
+wandb: Run history:
+wandb:   D_fake ▁
+wandb:   D_real ▁
+wandb:        G ▁
+wandb:    G_GAN ▁
+wandb:      NCE ▁
+wandb: 
+wandb: Run summary:
+wandb:   D_fake 0.07846
+wandb:   D_real 0.21975
+wandb:        G 6.989
+wandb:    G_GAN 1.58425
+wandb:      NCE 5.40474
+wandb: 
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Synced ContrastiveAttention: https://wandb.ai/edincer16/CycleGAN-SlotAttention/runs/383t5s32
+wandb: Find logs at: ./wandb/run-20230113_003452-383t5s32/logs/debug.log
+wandb: 
+

@@ -5,3 +5,9 @@ attentionGAN/wandb/
 cutGAN/horse2zebra/
 cutGAN/model_results/
 cutGAN/__pycache__/
+
+attentionGANwContrastiveLoss/horse2zebra/
+attentionGANwContrastiveLoss/model_results/
+attentionGANwContrastiveLoss/__pycache__/
+attentionGANwContrastiveLoss/wandb/
+Untitled.ipynb

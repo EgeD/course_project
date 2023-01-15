@@ -95,11 +95,11 @@ if __name__ == '__main__':
     # Model initializations
     n_epochs = 200
     n_epochs_decay = n_epochs
-    batch_size = 1
+    batch_size = 4
     model = CUT(input_dim=3,output_dim=3,n_epochs=n_epochs,lr_decay_iters=n_epochs_decay,
     n_epochs_decay=n_epochs_decay,batch_size=batch_size,num_patches=256,
     lambda_GAN=4.0, lambda_NCE=4.0,gan_mode='lsgan').cuda()
-    experiment_name = 'cut_baseline'
+    experiment_name = 'cut_baseline_b4'
     data_folder = '/kuacc/users/edincer16/Comp541_fall22/course_project/cutGAN/horse2zebra'
 
     transform = transforms.Compose([
